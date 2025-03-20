@@ -37,3 +37,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });
+app.use(express.json()); // ✅ Hỗ trợ dữ liệu JSON
+app.use(express.urlencoded({ extended: true })); // ✅ Hỗ trợ form data
