@@ -6,7 +6,7 @@ import adminAuth from '../middleware/adminAuth.js';
 const productRoute = express.Router();
 
 productRoute.post(
-    "/add",
+    "/add",adminAuth,
     upload.fields([
         { name: "image1", maxCount: 1 },
         { name: "image2", maxCount: 1 },
