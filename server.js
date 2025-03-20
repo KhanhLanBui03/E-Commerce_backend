@@ -1,10 +1,11 @@
-import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import connectDB from "./config/mongodb.js";
+import express from "express";
 import connectCloudinary from "./config/cloudinary.js";
-import userRoute from "./routes/userRoute.js";
+import connectDB from "./config/mongodb.js";
+import orderRoute from "./routes/orderRoute.js";
 import productRoute from "./routes/productRoute.js";
+import userRoute from "./routes/userRoute.js";
 
 // Load biến môi trường
 dotenv.config();
@@ -26,6 +27,8 @@ app.use(cors());
 // API Endpoints
 app.use("/api/user",userRoute);
 app.use("/api/product",productRoute);
+app.use("/api/order", orderRoute);
+
 app.get("/", (req, res) => {
     res.send("API Working");
 });
