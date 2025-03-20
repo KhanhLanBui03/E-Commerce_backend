@@ -1,39 +1,52 @@
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from '../models/productModel.js';
+import mongoose from "mongoose";
 //funcion for add product
 const addProduct = async (req, res) => {
     try {
+        console.log("📥 Dữ liệu nhận từ frontend:", req.body);
+        console.log("📷 Danh sách ảnh nhận được:", req.files);
+
         const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
 
-        // Kiểm tra req.files trước khi truy cập
-        const image1 =req.files.image1 && req.files?.image1?.[0]
-        const image2 =req.files.image2 && req.files?.image2?.[0]
-        const image3 =req.files.image3 && req.files?.image3?.[0]
-        const image4 =req.files.image4 && req.files?.image4?.[0]
-        const images = [image1, image2, image3, image4].filter((item)=>item !== undefined);
-        let imageUrl = await Promise.all(
-            images.map(async (item)=>{
-                let result = await cloudinary.uploader.upload(item.path,{resource_type: "image"});
-                return result.secure_url;
-            })
-        )
-        const productData ={
+        if (!name || !description || !price || !category || !subCategory) {
+            return res.status(400).json({ success: false, message: "Thiếu dữ liệu bắt buộc!" });
+        }
+
+        let images = [];
+        if (req.files) {
+            for (const key in req.files) {
+                const file = req.files[key][0];
+                const result = await cloudinary.uploader.upload_stream({ resource_type: "image" }, (error, result) => {
+                    if (error) {
+                        console.error("❌ Lỗi upload Cloudinary:", error);
+                    } else {
+                        images.push(result.secure_url);
+                    }
+                });
+                result.end(file.buffer); // ✅ Upload file từ RAM thay vì ổ đĩa
+            }
+        }
+
+        const productData = {
             name,
             description,
             price: Number(price),
             category,
             subCategory,
             sizes: JSON.parse(sizes),
-            bestseller: bestseller === "true"? true : false,
-            date: Date.now(),
-            image: imageUrl
-        }
+            bestseller: bestseller === "true",
+            image: images,
+            date: Date.now()
+        };
+
         const newProduct = new productModel(productData);
         await newProduct.save();
-        res.json({success: true, message: "Product added successfully", product: newProduct})
+
+        res.json({ success: true, message: "Sản phẩm đã được thêm thành công!", product: newProduct });
     } catch (error) {
-        console.error("Error in addProduct:", error);
-        res.json({ success: false, message: error.message});
+        console.error("❌ Lỗi khi thêm sản phẩm:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -68,14 +81,26 @@ const listProduct = async (req, res) => {
 //function for removing product 
 const removeProduct = async (req, res) => {
     try {
-        const { id } = req.body;
-        await productModel.findByIdAndDelete(id);
-        res.json({success: true, message: "Product removed successfully"});
+        const { _id } = req.body;
+
+        
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).json({ success: false, message: "ID không hợp lệ" });
+        }
+
+        
+        const product = await productModel.findByIdAndDelete(new mongoose.Types.ObjectId(_id));
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Sản phẩm không tồn tại" });
+        }
+
+        res.json({ success: true, message: "Sản phẩm đã bị xóa" });
     } catch (error) {
-        console.error("Error in removeProduct:", error);
-        res.json({ success: false, message: error.message});
+        console.error("Lỗi xóa sản phẩm:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
-}
+};
 
 //function for get single product 
 const singleProduct = async (req, res) => {
