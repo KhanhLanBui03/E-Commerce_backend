@@ -1,4 +1,3 @@
-
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from '../models/productModel.js';
 //funcion for add product
@@ -29,15 +28,30 @@ const addProduct = async (req, res) => {
             date: Date.now(),
             image: imageUrl
         }
-        console.log(productData);
-        const product = new productModel(productData);
-        await product.save();
-
-        res.json({success: true, message: "Product added successfully"});
-
+        const newProduct = new productModel(productData);
+        await newProduct.save();
+        res.json({success: true, message: "Product added successfully", product: newProduct})
     } catch (error) {
         console.error("Error in addProduct:", error);
         res.json({ success: false, message: error.message});
+    }
+};
+
+//function for add product from JSON (không cần upload hình ảnh qua multer)
+export const addProductJSON = async (req, res) => {
+    try {
+        const productData = {
+            ...req.body,
+            date: Date.now() // Cập nhật thời gian hiện tại
+        };
+        
+        const newProduct = new productModel(productData);
+        await newProduct.save();
+        
+        res.json({success: true, message: "Sản phẩm đã được thêm thành công!", product: newProduct});
+    } catch (error) {
+        console.error("Lỗi khi thêm sản phẩm:", error);
+        res.json({success: false, message: error.message});
     }
 };
 
@@ -63,10 +77,10 @@ const removeProduct = async (req, res) => {
     }
 }
 
-//function for single product info
+//function for get single product 
 const singleProduct = async (req, res) => {
     try {
-        const { id } = req.body;
+        const { id } = req.query;
         const product = await productModel.findById(id);
         res.json({success: true, product});
     } catch (error) {

@@ -1,6 +1,6 @@
-import validator from "validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import validator from "validator";
 import userModel from "../models/userModel.js";
 
 const createToken = (id) => {
@@ -20,15 +20,14 @@ const loginUser = async (req,res) =>{
         const isMatch = await bcrypt.compare(password,user.password);
         if(isMatch){
             const token = createToken(user._id);
-            res.json({success:true,token});
+            return res.json({success:true,token});
         }
         if(!isMatch){
             return res.json({success:false,message:"Invalid credentials"});
         }
-        const token = createToken(user._id);
     } catch (error) {
         console.log(error);
-        res.json({success:false,message:error.message});
+        res.json({success:false,message:"An error occurred while logging in."});
         
     }
 }
@@ -74,6 +73,9 @@ const adminLogin = async (req,res) =>{
     try {
         const {email,password} = req.body;
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
+            if (!process.env.JWT_SECRET) {
+                return res.json({success:false,message:"Server configuration error."});
+            }
             const token = jwt.sign(email+password,process.env.JWT_SECRET);
             res.json({success:true,token}); 
         }else {
@@ -82,8 +84,27 @@ const adminLogin = async (req,res) =>{
         
     } catch (error) {
         console.log(error);
-        res.json({success:false,message:error.message});
+        res.json({success:false,message:"An error occurred during admin login."});
         
     }
 };
-export {loginUser,registerUser,adminLogin};
+
+// Route for getting admin stats
+const getAdminStats = async (req, res) => {
+    try {
+        // Logic to fetch stats
+        const stats = {
+            totalProducts: 100, // Example data
+            totalOrders: 200,  // Example data
+            totalRevenue: 50000, // Example data
+            pendingOrders: 10  // Example data
+        };
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "An error occurred while fetching stats." });
+    }
+};
+
+export { adminLogin, getAdminStats, loginUser, registerUser };
+
