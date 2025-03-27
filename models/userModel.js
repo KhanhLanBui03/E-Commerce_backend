@@ -18,7 +18,12 @@ const userSchema = new mongoose.Schema({
         type: Object,
         default: {},
     },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    }
 },{minimize: false});
 
-const userModel = mongoose.models.user || mongoose.model("user", userSchema);
+const userModel = mongoose.model("User", userSchema);
+
 export default userModel;
