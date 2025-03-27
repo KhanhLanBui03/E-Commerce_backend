@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-import productModel from '../models/productModel.js';
 import mongoose from "mongoose";
+import productModel from '../models/productModel.js';
 //funcion for add product
 const addProduct = async (req, res) => {
     try {
@@ -143,6 +143,7 @@ export const addProductJSON = async (req, res) => {
 const listProduct = async (req, res) => {
     try {
         const products = await productModel.find({});
+        console.log("Dữ liệu sản phẩm từ database:", products);
         res.json({success: true, products});
     } catch (error) {
         console.error("Error in listProduct:", error);

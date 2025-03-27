@@ -3,10 +3,16 @@ import userModel from '../models/userModel.js';
 
 const userAuth = async (req, res, next) => {
     try {
-        const { token } = req.headers;
+        // Lấy token từ header Authorization hoặc header token
+        let token = req.headers.authorization || req.headers.token;
         
         if (!token) {
             return res.json({ success: false, message: "Không tìm thấy token, vui lòng đăng nhập" });
+        }
+
+        // Xử lý token nếu ở định dạng "Bearer token"
+        if (token.startsWith('Bearer ')) {
+            token = token.slice(7);
         }
         
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
