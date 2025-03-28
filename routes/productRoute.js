@@ -4,7 +4,6 @@ import adminAuth from '../middleware/adminAuth.js';
 import upload from '../middleware/multer.js';
 import productModel from '../models/productModel.js';
 
-
 const productRoute = express.Router();
 
 productRoute.post(

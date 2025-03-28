@@ -2,7 +2,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import mongoose from "mongoose";
 import productModel from '../models/productModel.js';
 //funcion for add product
-const addProduct = async (req, res) => {
+export const addProduct = async (req, res) => {
     try {
         console.log("📥 Dữ liệu nhận từ frontend:", req.body);
         console.log("📷 Danh sách ảnh nhận được:", req.files);
@@ -140,18 +140,76 @@ export const addProductJSON = async (req, res) => {
 };
 
 //function for get all products
-const listProduct = async (req, res) => {
+export const listProduct = async (req, res) => {
     try {
-        const products = await productModel.find({});
-        console.log("Dữ liệu sản phẩm từ database:", products);
-        res.json({success: true, products});
+        console.log("📍 Request Query Parameters:", req.query);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const search = req.query.search || "";
+        const category = req.query.category ? req.query.category.split(',') : [];
+        const subCategory = req.query.subCategory ? req.query.subCategory.split(',') : [];
+        const sortType = req.query.sortType || "relevant";
+
+        // Xây dựng query
+        let query = {};
+        
+        // Thêm điều kiện tìm kiếm
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+        
+        // Thêm điều kiện lọc category
+        if (category.length > 0) {
+            query.category = { $in: category };
+        }
+        
+        // Thêm điều kiện lọc subCategory
+        if (subCategory.length > 0) {
+            query.subCategory = { $in: subCategory };
+        }
+
+        // Tính toán số lượng bỏ qua
+        const skip = (page - 1) * limit;
+
+        // Xây dựng sort options
+        let sortOptions = {};
+        switch (sortType) {
+            case "low-high":
+                sortOptions = { price: 1 };
+                break;
+            case "high-low":
+                sortOptions = { price: -1 };
+                break;
+            default:
+                sortOptions = { date: -1 }; // Mặc định sắp xếp theo ngày tạo mới nhất
+        }
+
+        // Lấy limit + 1 sản phẩm để kiểm tra xem còn trang tiếp theo không
+        const products = await productModel
+            .find(query)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit + 1);
+
+        // Kiểm tra xem có sản phẩm ở trang tiếp theo không
+        const hasNextPage = products.length > limit;
+        
+        // Chỉ trả về đúng số lượng limit sản phẩm
+        const responseProducts = products.slice(0, limit);
+
+        res.json({
+            success: true,
+            products: responseProducts,
+            currentPage: page,
+            hasNextPage
+        });
     } catch (error) {
-        console.error("Error in listProduct:", error);
-        res.json({ success: false, message: error.message});
+        console.error("❌ Error in listProduct:", error);
+        res.json({ success: false, message: error.message });
     }
-}
+};
 //function for removing product 
-const removeProduct = async (req, res) => {
+export const removeProduct = async (req, res) => {
     try {
         const { _id } = req.body;
 
@@ -175,7 +233,7 @@ const removeProduct = async (req, res) => {
 };
 
 //function for get single product 
-const singleProduct = async (req, res) => {
+export const singleProduct = async (req, res) => {
     try {
         const { id } = req.query;
         const product = await productModel.findById(id);
@@ -185,7 +243,5 @@ const singleProduct = async (req, res) => {
         res.json({ success: false, message: error.message});
     }
 }
-
-export { addProduct, listProduct, removeProduct, singleProduct };
 
 
