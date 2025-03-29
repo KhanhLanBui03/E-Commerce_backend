@@ -21,17 +21,17 @@ export const updateOrderStatus = async (req, res) => {
     const { orderId, status } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.json({ success: false, message: "ID đơn hàng không hợp lệ" });
+      return res.json({ success: false, message: "Invalid order ID" });
     }
 
     const validStatuses = [
-      "Đang xử lý",
-      "Đang giao hàng",
-      "Đã giao hàng",
-      "Đã hủy",
+      "Processing",
+      "Shipping",
+      "Delivered",
+      "Cancelled"
     ];
     if (!validStatuses.includes(status)) {
-      return res.json({ success: false, message: "Trạng thái không hợp lệ" });
+      return res.json({ success: false, message: "Invalid status" });
     }
 
     const order = await orderModel.findByIdAndUpdate(
@@ -41,16 +41,16 @@ export const updateOrderStatus = async (req, res) => {
     );
 
     if (!order) {
-      return res.json({ success: false, message: "Không tìm thấy đơn hàng" });
+      return res.json({ success: false, message: "Order not found" });
     }
 
     res.json({
       success: true,
-      message: "Cập nhật trạng thái đơn hàng thành công",
+      message: "Order status updated successfully",
       order,
     });
   } catch (error) {
-    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
+    console.error("Error updating order status:", error);
     res.json({ success: false, message: error.message });
   }
 };
