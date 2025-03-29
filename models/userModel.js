@@ -14,11 +14,24 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phone: {
+        type: String,
+        default: '',
+    },
+    address: {
+        type: String,
+        default: '',
+    },
     cartData: {
         type: Object,
         default: {},
     },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    }
 },{minimize: false});
 
-const userModel = mongoose.model.user || mongoose.model("user", userSchema);
+const userModel = mongoose.model("User", userSchema);
+
 export default userModel;

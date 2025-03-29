@@ -76,7 +76,8 @@ const adminLogin = async (req,res) =>{
             if (!process.env.JWT_SECRET) {
                 return res.json({success:false,message:"Server configuration error."});
             }
-            const token = jwt.sign(email+password,process.env.JWT_SECRET);
+            // Tạo token với một ID duy nhất cho admin
+            const token = jwt.sign({ id: 'admin', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
             res.json({success:true,token}); 
         }else {
             res.json({success:false,message:"Invalid credentials"});
@@ -85,7 +86,6 @@ const adminLogin = async (req,res) =>{
     } catch (error) {
         console.log(error);
         res.json({success:false,message:"An error occurred during admin login."});
-        
     }
 };
 
@@ -106,5 +106,53 @@ const getAdminStats = async (req, res) => {
     }
 };
 
-export { adminLogin, getAdminStats, loginUser, registerUser };
+// Get user profile
+const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const user = await userModel.findById(userId).select('-password');
+        
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.json({ success: false, message: "An error occurred while fetching profile" });
+    }
+};
+
+// Update user profile
+const updateUserProfile = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { name, email, phone, address } = req.body;
+
+        // Check if email is being changed and if it's already taken
+        if (email) {
+            const existingUser = await userModel.findOne({ email, _id: { $ne: userId } });
+            if (existingUser) {
+                return res.json({ success: false, message: "Email is already taken" });
+            }
+        }
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId,
+            { name, email, phone, address },
+            { new: true, select: '-password' }
+        );
+
+        if (!updatedUser) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, user: updatedUser });
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        res.json({ success: false, message: "An error occurred while updating profile" });
+    }
+};
+
+export { adminLogin, getAdminStats, getUserProfile, loginUser, registerUser, updateUserProfile };
 

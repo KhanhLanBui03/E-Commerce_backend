@@ -26,7 +26,7 @@ app.use(cors());
 
 // API Endpoints
 app.use("/api/user",userRoute);
-app.use("/api/product",productRoute);
+app.use("/api/products",productRoute);
 app.use("/api/order", orderRoute);
 
 app.get("/", (req, res) => {
@@ -37,3 +37,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });
+app.use(express.json()); // ✅ Hỗ trợ dữ liệu JSON
+app.use(express.urlencoded({ extended: true })); // ✅ Hỗ trợ form data

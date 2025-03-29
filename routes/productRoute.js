@@ -7,7 +7,7 @@ import productModel from '../models/productModel.js';
 const productRoute = express.Router();
 
 productRoute.post(
-    "/add",
+    "/add", 
     upload.fields([
         { name: "image1", maxCount: 1 },
         { name: "image2", maxCount: 1 },
@@ -17,9 +17,9 @@ productRoute.post(
     addProduct
 );
 productRoute.get('/list', listProduct);
-productRoute.delete('/remove', adminAuth, removeProduct);
-productRoute.get('/single', singleProduct);
-productRoute.post('/add-json', adminAuth, addProductJSON);
+productRoute.post('/remove', removeProduct);
+productRoute.post('/single', singleProduct);
+productRoute.post('/add-json', addProductJSON);
 productRoute.post('/bulk-import', adminAuth, async (req, res) => {
     try {
         const { products } = req.body;
