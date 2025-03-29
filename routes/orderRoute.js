@@ -1,5 +1,11 @@
 import express from "express";
 import mongoose from "mongoose";
+import {
+    exportOrder,
+    exportOrdersByDateRange,
+    getAllOrders,
+    updateOrderStatus
+} from "../controllers/orderController.js";
 import adminAuth from "../middleware/adminAuth.js";
 import userAuth from "../middleware/userAuth.js";
 import orderModel from "../models/orderModel.js";
@@ -37,19 +43,7 @@ orderRoute.post("/create", userAuth, async (req, res) => {
 });
 
 // API for getting all orders (admin only)
-orderRoute.get("/all", adminAuth, async (req, res) => {
-  try {
-    const orders = await orderModel
-      .find({})
-      .populate("userId", "name email")
-      .sort({ orderDate: -1 });
-
-    res.json({ success: true, orders });
-  } catch (error) {
-    console.error("Lỗi khi lấy tất cả đơn hàng:", error);
-    res.json({ success: false, message: error.message });
-  }
-});
+orderRoute.get("/all", adminAuth, getAllOrders);
 
 // API for getting orders of a specific user
 orderRoute.get("/user-orders", userAuth, async (req, res) => {
@@ -65,44 +59,7 @@ orderRoute.get("/user-orders", userAuth, async (req, res) => {
 });
 
 // API for updating order status (admin only)
-orderRoute.patch("/update-status", adminAuth, async (req, res) => {
-  try {
-    const { orderId, status } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.json({ success: false, message: "ID đơn hàng không hợp lệ" });
-    }
-
-    const validStatuses = [
-      "Đang xử lý",
-      "Đang giao hàng",
-      "Đã giao hàng",
-      "Đã hủy",
-    ];
-    if (!validStatuses.includes(status)) {
-      return res.json({ success: false, message: "Trạng thái không hợp lệ" });
-    }
-
-    const order = await orderModel.findByIdAndUpdate(
-      orderId,
-      { status, updatedAt: Date.now() },
-      { new: true }
-    );
-
-    if (!order) {
-      return res.json({ success: false, message: "Không tìm thấy đơn hàng" });
-    }
-
-    res.json({
-      success: true,
-      message: "Cập nhật trạng thái đơn hàng thành công",
-      order,
-    });
-  } catch (error) {
-    console.error("Lỗi khi cập nhật trạng thái đơn hàng:", error);
-    res.json({ success: false, message: error.message });
-  }
-});
+orderRoute.patch("/update-status", adminAuth, updateOrderStatus);
 
 // API for getting a specific order
 orderRoute.get("/detail/:id", async (req, res) => {
@@ -162,5 +119,11 @@ orderRoute.patch("/cancel", userAuth, async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 });
+
+// API for exporting an order by ID
+orderRoute.get("/export/:orderId", exportOrder);
+
+// API for exporting orders by date range
+orderRoute.post("/export-by-date", exportOrdersByDateRange);
 
 export default orderRoute;

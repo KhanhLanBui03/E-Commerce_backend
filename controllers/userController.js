@@ -76,7 +76,8 @@ const adminLogin = async (req,res) =>{
             if (!process.env.JWT_SECRET) {
                 return res.json({success:false,message:"Server configuration error."});
             }
-            const token = jwt.sign(email+password,process.env.JWT_SECRET);
+            // Tạo token với một ID duy nhất cho admin
+            const token = jwt.sign({ id: 'admin', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
             res.json({success:true,token}); 
         }else {
             res.json({success:false,message:"Invalid credentials"});
@@ -85,7 +86,6 @@ const adminLogin = async (req,res) =>{
     } catch (error) {
         console.log(error);
         res.json({success:false,message:"An error occurred during admin login."});
-        
     }
 };
 
