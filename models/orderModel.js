@@ -52,8 +52,8 @@ const orderSchema = new mongoose.Schema({
     },
     paymentStatus: {
         type: String,
-        default: 'Chưa thanh toán',
-        enum: ['Chưa thanh toán', 'Đã thanh toán', 'Hoàn tiền']
+        default: 'Unpaid',
+        enum: ['Unpaid', 'Paid', 'Refunded']
     },
     totalAmount: {
         type: Number,
@@ -61,8 +61,8 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'Đang xử lý',
-        enum: ['Đang xử lý', 'Đang giao hàng', 'Đã giao hàng', 'Đã hủy']
+        default: 'Processing',
+        enum: ['Processing', 'Shipping', 'Delivered', 'Cancelled']
     },
     orderDate: {
         type: Date,

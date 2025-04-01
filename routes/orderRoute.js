@@ -1,10 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
 import {
-    exportOrder,
-    exportOrdersByDateRange,
-    getAllOrders,
-    updateOrderStatus
+  exportOrder,
+  exportOrdersByDateRange,
+  getAllOrders,
+  updateOrderStatus
 } from "../controllers/orderController.js";
 import adminAuth from "../middleware/adminAuth.js";
 import userAuth from "../middleware/userAuth.js";
@@ -24,7 +24,7 @@ orderRoute.post("/create", userAuth, async (req, res) => {
       address,
       paymentMethod,
       totalAmount,
-      status: "Đang xử lý",
+      status: "Processing",
       orderDate: Date.now(),
     };
 
@@ -33,11 +33,11 @@ orderRoute.post("/create", userAuth, async (req, res) => {
 
     res.json({
       success: true,
-      message: "Đơn hàng đã được tạo thành công",
+      message: "Order created successfully",
       order: newOrder,
     });
   } catch (error) {
-    console.error("Lỗi khi tạo đơn hàng:", error);
+    console.error("Error creating order:", error);
     res.json({ success: false, message: error.message });
   }
 });
@@ -53,7 +53,7 @@ orderRoute.get("/user-orders", userAuth, async (req, res) => {
 
     res.json({ success: true, orders });
   } catch (error) {
-    console.error("Lỗi khi lấy đơn hàng của người dùng:", error);
+    console.error("Error fetching user orders:", error);
     res.json({ success: false, message: error.message });
   }
 });
@@ -67,7 +67,7 @@ orderRoute.get("/detail/:id", async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.json({ success: false, message: "ID đơn hàng không hợp lệ" });
+      return res.json({ success: false, message: "Invalid order ID" });
     }
 
     const order = await orderModel
@@ -76,12 +76,12 @@ orderRoute.get("/detail/:id", async (req, res) => {
       .populate("products.productId", "name price image");
 
     if (!order) {
-      return res.json({ success: false, message: "Không tìm thấy đơn hàng" });
+      return res.json({ success: false, message: "Order not found" });
     }
 
     res.json({ success: true, order });
   } catch (error) {
-    console.error("Lỗi khi lấy chi tiết đơn hàng:", error);
+    console.error("Error fetching order details:", error);
     res.json({ success: false, message: error.message });
   }
 });
@@ -93,29 +93,29 @@ orderRoute.patch("/cancel", userAuth, async (req, res) => {
     const userId = req.userId;
 
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.json({ success: false, message: "ID đơn hàng không hợp lệ" });
+      return res.json({ success: false, message: "Invalid order ID" });
     }
 
     const order = await orderModel.findOne({ _id: orderId, userId });
 
     if (!order) {
-      return res.json({ success: false, message: "Không tìm thấy đơn hàng" });
+      return res.json({ success: false, message: "Order not found" });
     }
 
-    if (order.status !== "Đang xử lý") {
+    if (order.status !== "Processing") {
       return res.json({
         success: false,
-        message: "Chỉ có thể hủy đơn hàng ở trạng thái đang xử lý",
+        message: "Orders can only be cancelled when in Processing status",
       });
     }
 
-    order.status = "Đã hủy";
+    order.status = "Cancelled";
     order.updatedAt = Date.now();
     await order.save();
 
-    res.json({ success: true, message: "Hủy đơn hàng thành công", order });
+    res.json({ success: true, message: "Order cancelled successfully", order });
   } catch (error) {
-    console.error("Lỗi khi hủy đơn hàng:", error);
+    console.error("Error cancelling order:", error);
     res.json({ success: false, message: error.message });
   }
 });
