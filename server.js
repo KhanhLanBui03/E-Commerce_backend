@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS configuration
 app.use(cors({
-  origin: ['https://clone-e-commerce-khaki.vercel.app', 'http://localhost:3000', 'http://localhost:5175', 'https://e-commerce-admin-panel-ashy.vercel.app', 'https://admin-zeta-nine.vercel.app', 'https://admin-9xtz19yqg-kane-lovegoods-projects-fac17334.vercel.app'],
+  origin: ['https://clone-e-commerce-khaki.vercel.app', 'http://localhost:3000', 'http://localhost:5175', 'https://e-commerce-admin-panel-ashy.vercel.app', 'https://admin-zeta-nine.vercel.app', 'https://admin-9xtz19yqg-kane-lovegoods-projects-fac17334.vercel.app', 'https://ecommerceadminpanel-ashen.vercel.app', 'https://ecommerceadminpanel-bzjbu26c1-kane-lovegoods-projects-fac17334.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true
 }));
