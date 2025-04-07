@@ -7,35 +7,43 @@ import orderRoute from "./routes/orderRoute.js";
 import productRoute from "./routes/productRoute.js";
 import userRoute from "./routes/userRoute.js";
 
-// Load biến môi trường
+// Load environment variables
 dotenv.config();
 
-// Kiểm tra biến môi trường
-console.log("MONGODB_URI:", process.env.MONGODB_URI);
-
-// Kết nối MongoDB
-connectDB();
-connectCloudinary();
-// App Config
+// Initialize express
 const app = express();
-const port = process.env.PORT || 4000;
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS configuration
+app.use(cors({
+  origin: ['https://clone-e-commerce-khaki.vercel.app', 'http://localhost:3000', 'http://localhost:5175'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true
+}));
+
+// Connect to MongoDB
+connectDB();
+connectCloudinary();
 
 // API Endpoints
-app.use("/api/user",userRoute);
-app.use("/api/products",productRoute);
+app.use("/api/user", userRoute);
+app.use("/api/products", productRoute);
 app.use("/api/order", orderRoute);
 
 app.get("/", (req, res) => {
-    res.send("API Working");
+    res.status(200).json({ message: "API Working" });
 });
 
-// Start Server
-app.listen(port, () => {
-    console.log(`Server is running on port: ${port}`);
-});
-app.use(express.json()); // ✅ Hỗ trợ dữ liệu JSON
-app.use(express.urlencoded({ extended: true })); // ✅ Hỗ trợ form data
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 4000;
+    app.listen(port, () => {
+        console.log(`Server is running on port: ${port}`);
+    });
+}
+
+// Export for Vercel
+export default app;
