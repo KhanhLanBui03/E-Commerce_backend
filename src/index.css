@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Prata&display=swap');
+
+/* CSS cơ bản */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Outfit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+a.active hr {
+  display: block;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.prata-regular {
+  font-family: "Prata", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Tailwind không còn thông qua PostCSS mà thông qua CDN */
+/* Bổ sung một số lớp hữu ích */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.p-4 { padding: 1rem; }
+.m-4 { margin: 1rem; }
+.rounded { border-radius: 0.25rem; }
+
+@media (max-width:640px) {
+  a.active {
+    background-color: black;
+    color: white;
+  }
+}
+  
